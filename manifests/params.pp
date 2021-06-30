@@ -348,6 +348,7 @@ class zabbix::params {
 
   # Agent specific params
   $install_agent2                           = true
+  $agent_remove_other                       = true
   $agent_allowroot                          = '0'
   $agent_buffersend                         = '5'
   $agent_buffersize                         = '100'

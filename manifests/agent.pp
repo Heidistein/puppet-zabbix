@@ -17,6 +17,9 @@
 # [*install_agent2*]
 #   When true, it will install agent2 package and remove agent package.
 #
+# [*agent_remove_other*]
+#   When true (default), it will remove agent of agent2 is installed, vice versa.
+#
 # [*zabbix_package_state*]
 #   The state of the package that needs to be installed: present or latest.
 #   Default: present
@@ -288,6 +291,7 @@
 class zabbix::agent (
   $zabbix_version                                 = $zabbix::params::zabbix_version,
   Boolean $install_agent2                         = $zabbix::params::install_agent2,
+  Boolean $remove_other                           = $zabbix::params::agent_remove_other,
   $zabbix_package_state                           = $zabbix::params::zabbix_package_state,
   Optional[String[1]] $zabbix_package_agent       = undef,
   Optional[String[1]] $zabbix_package_provider    = $zabbix::params::zabbix_package_provider,
@@ -485,12 +489,21 @@ class zabbix::agent (
     }
   }
 
-  if $install_agent2 {
-    # Ensure old agent is removed
-    package { $zabbix::params::zabbix_package_agent:
-      ensure   => absent,
-      tag      => 'zabbix',
-      provider => $zabbix_package_provider,
+  if $remove_other {
+    if $install_agent2 {
+      # Ensure old agent is removed
+      package { $zabbix::params::zabbix_package_agent:
+        ensure   => absent,
+        tag      => 'zabbix',
+        provider => $zabbix_package_provider,
+      }
+    } else {
+      # Remove agent2
+      package { $zabbix::params::zabbix_package_agent2:
+        ensure   => absent,
+        tag      => 'zabbix',
+        provider => $zabbix_package_provider,
+      }
     }
   }
 
